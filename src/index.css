@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-black text-text-primary;
+    background-image: 
+      radial-gradient(circle at 10% 20%, rgba(50, 50, 50, 0.4) 0%, transparent 40%),
+      linear-gradient(115deg, #000 0%, #1a1a1a 40%, #050505 70%, #000 100%),
+      repeating-linear-gradient(115deg, transparent 0, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 41px);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-glass-bg border border-glass-border backdrop-blur-glass;
+    box-shadow: 
+      inset 0px 0px 4px 1px rgba(0,0,0, 0.3), 
+      -3px -3px 4px rgba(255,255,255, 0.1), 
+      3px 3px 6px rgba(0,0,0, 0.5), 
+      0px 4px 40px rgba(0,0,0, 0.3);
+  }
+}
+
+/* Masonry Grid Styles */
+.my-masonry-grid {
+  display: flex;
+  margin-left: -24px; /* gutter size offset */
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 24px; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1); 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2); 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3); 
+}

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS Liquid Glass UI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #000000;
+            /* 模拟 Liquid Glass 材质：深色但透光 */
+            --glass-bg: rgba(40, 40, 40, 0.35);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shine: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(235, 235, 245, 0.6); /* Apple Label Color Secondary */
+            --accent-gray: rgba(255, 255, 255, 0.2);
+            --blur-amount: 40px; /* 深度模糊 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* 强制使用苹果系统字体 */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* 背景图：模拟原图中的深色烟雾/波浪效果 */
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(50, 50, 50, 0.4) 0%, transparent 40%),
+                linear-gradient(115deg, #000 0%, #1a1a1a 40%, #050505 70%, #000 100%),
+                repeating-linear-gradient(115deg, transparent 0, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 41px);
+        }
+
+        /* 手机外壳 */
+        .phone-frame {
+            width: 393px; /* iPhone 14/15 Pro 宽度 */
+            height: 852px;
+            background: rgba(0,0,0,0); /* 完全透明，透出 Body 背景 */
+            border-radius: 55px;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #1c1c1c; /* 模拟机身边框 */
+            box-shadow: 0 0 0 2px #333, 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        /* 顶部状态栏 */
+        .status-bar {
+            height: 54px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 35px;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            position: relative;
+            z-index: 10;
+            margin-top: 5px;
+        }
+
+        .dynamic-island {
+            position: absolute;
+            top: 11px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 126px;
+            height: 37px;
+            background-color: black;
+            border-radius: 20px;
+            z-index: 20;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .status-icons i { font-size: 14px; }
+
+        /* 内容区域 */
+        .content {
+            padding: 10px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* 通用玻璃组件样式 */
+        .glass-widget {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            border: 1px solid var(--glass-border);
+            border-radius: 26px; /* iOS 小组件标准圆角 */
+            padding: 18px;
+            color: var(--text-primary);
+            position: relative;
+            box-shadow: 
+            /* 基础内部阴影（用于厚度） */
+            inset 0px 0px 4px 1px rgba(0,0,0, 0.3), 
+            
+            /* 顶部/左侧高光（关键凸出效果 1）*/
+            -3px -3px 4px rgba(255,255,255, 0.1), 
+            
+            /* 底部/右侧阴影（关键凸出效果 2）*/
+            3px 3px 6px rgba(0,0,0, 0.5), 
+            
+            /* 外部柔和浮动阴影 */
+            0px 4px 40px rgba(0,0,0, 0.3);
+            /* 添加微妙的顶部高光 */
+            background-image: linear-gradient(to bottom, var(--glass-shine), transparent 40%);
+        }
+
+        /* 第一行：两个小组件 */
+        .grid-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .small-widget {
+            aspect-ratio: 1 / 1; /* 正方形 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .widget-icon {
+            font-size: 22px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .widget-title {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .widget-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* 中号组件：Progress */
+        .medium-widget {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 150px;
+        }
+
+        .widget-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .header-icon-box {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            color: #ddd;
+        }
+
+        .progress-container {
+            margin-top: auto;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        .progress-labels span:last-child {
+            color: var(--text-primary); /* 数字稍微亮一点 */
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 67%;
+            height: 100%;
+            background: #e0e0e0; /* 接近白色的浅灰 */
+            border-radius: 6px;
+        }
+
+        /* 习惯追踪组件 (Sterk) */
+        .habit-widget {
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .habit-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .fire-icon {
+            font-size: 24px;
+            color: #e0e0e0; /* 这里的火焰是白色的风格 */
+        }
+
+        .check-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .check-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15); /* 未完成/默认背景 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .check-circle.completed {
+            background: #9e9ea3; /* 灰色选中态 */
+            color: white;
+            font-size: 14px;
+        }
+        
+        .check-circle.checked-icon::after {
+            content: '\f00c';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+        }
+
+        .check-circle.number {
+            font-weight: 600;
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* 分页点 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .dot.active {
+            background: white;
+        }
+
+        /* 底部 Dock 栏 */
+        .dock-container {
+            position: absolute;
+            bottom: 35px;
+            left: 24px;
+            right: 24px;
+            height: 95px;
+            /* Dock 栏专有的玻璃材质，比组件更透一点 */
+            background: rgba(40, 40, 40, 0.25);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 35px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            color: white;
+            /* 模拟 App 图标的渐变背景 - 这里做单色处理以符合 Liquid Glass 风格，
+               或者模拟真实图标的毛玻璃版本 */
+            background: rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 简单的图标模拟 */
+        .safari { background: linear-gradient(180deg, #b0b0b0 0%, #6e6e6e 100%); }
+        .messages { background: linear-gradient(180deg, #5fc9f8 0%, #007aff 100%); color: white; } /* 保持一点原本色调 */
+        .appstore { background: linear-gradient(180deg, #4faceb 0%, #007aff 100%); }
+        .music { background: linear-gradient(180deg, #fa2d48 0%, #fa2d48 100%); }
+
+        /* 为了完全符合提供的单色/深色 Glass 风格，我们将图标去色 */
+        .app-icon {
+            background: rgba(200, 200, 200, 0.15) !important;
+            backdrop-filter: blur(5px);
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <div class="dynamic-island"></div>
+
+        <div class="status-bar">
+            <span>8:30</span>
+            <div class="status-icons">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full"></i> </div>
+        </div>
+
+        <div class="content">
+            <div class="grid-row">
+                <div class="glass-widget small-widget">
+                    <i class="fas fa-mobile-alt widget-icon"></i>
+                    <div>
+                        <div class="widget-title">Daily dual phones</div>
+                        <div class="widget-sub">Day 2</div>
+                    </div>
+                </div>
+
+                <div class="glass-widget small-widget">
+                    <i class="fas fa-utensils widget-icon"></i>
+                    <div>
+                        <div class="widget-title">Eat last meal earlier</div>
+                        <div class="widget-sub">Day 1</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-widget medium-widget">
+                <div class="widget-header">
+                    <div class="header-icon-box">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">100 days of UI/Ux design</div>
+                        <div class="widget-sub">29 days left</div>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-labels">
+                        <span>Progress</span>
+                        <span>67/100 days</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-widget habit-widget">
+                <div class="habit-top">
+                    <div>
+                        <div class="widget-title">2 days of Sterk</div>
+                        <div class="widget-sub">100 Days of UI\Ux Design</div>
+                    </div>
+                    <i class="fas fa-fire fire-icon"></i>
+                </div>
+                
+                <div class="check-row">
+                    <div class="check-circle completed checked-icon"></div>
+                    <div class="check-circle completed checked-icon"></div>
+                    <div class="check-circle completed checked-icon"></div>
+                    <div class="check-circle number">13</div> <div class="check-circle completed checked-icon"></div>
+                    <div class="check-circle completed checked-icon"></div>
+                </div>
+            </div>
+
+            <div class="pagination">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+        <div class="dock-container">
+            <div class="app-icon">
+                <i class="far fa-compass"></i> </div>
+            <div class="app-icon">
+                <i class="fas fa-comment"></i> </div>
+            <div class="app-icon">
+                <i class="fab fa-app-store-ios"></i> </div>
+            <div class="app-icon">
+                <i class="fas fa-music"></i> </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
